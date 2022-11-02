@@ -18,31 +18,47 @@ $(function() {
             }
         }
     })
+    let layer = layui.layer;
 
-    $('#form_login').on('submit', function(e) {
-        e.preventDefault();
-        var data = {
-            username: $('#name').val(),
-            password: $('#pwd').val(),
-        };
-        console.log(data.username);
-        $.post('http://127.0.0.1:3007/api/login', data, function(res) {
-            console.log(res);
+    $('#form_login').submit(function(e) {
+        // 阻止默认提交行为
+        e.preventDefault()
+        $.ajax({
+            url: '/api/login',
+            method: 'POST',
+            // 快速获取表单中的数据
+            data: $(this).serialize(),
+            success: function(res) {
+                if (res.status !== 0) {
+                    return layer.msg('登录失败！')
+                }
+                layer.msg('登录成功！')
+                console.log(res);
+                // 将登录成功得到的 token 字符串，保存到 localStorage 中
+                localStorage.setItem('token', res.token)
+                    // 跳转到后台主页
+                location.href = '/index.html'
+            }
         })
     })
 
     $('#form_reg').on('submit', function(e) {
-        e.preventDefault();
-        var data = {
-            username: $('#name').val(),
-            password: $('#pwd').val(),
-        };
-        console.log(data.username);
-        $.post('http://127.0.0.1:3007/api/reguser', data, function(res) {
-            console.log(res);
+        // 1. 阻止默认的提交行为
+        e.preventDefault()
+            // 2. 发起Ajax的POST请求
+            // var data = {
+            //     username: $('#form_reg [name=username]').val(),
+            //     password: $('#form_reg [name=password]').val()
+            // }
+        $.post('/api/reguser', $(this).serialize(), function(res) {
+            if (res.status !== 0) {
+                return layer.msg(res.message)
+            }
+            layer.msg('注册成功，请登录！')
+                // 模拟人的点击行为
+            $('#link_login').click()
         })
     })
-
 
 
 })
